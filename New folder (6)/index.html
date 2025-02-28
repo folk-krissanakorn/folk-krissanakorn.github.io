@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,8 +14,8 @@
             <button id="tomorrowBtn">Tomorrow</button>
             <button id="allBtn">All</button>
         </header>
-        <h1>25 February</h1>
-        <p>08.00</p>
+        <h1 id="currentDate"></h1>
+        <p id="currentTime"></p>
         <div id="taskList"></div>
         <button id="addTask">+</button>
     </div>
@@ -22,7 +23,10 @@
     <div id="addTaskPage" style="display: none;">
         <button id="backBtn">Back</button>
         <h2>Select Time</h2>
-        <input type="time" id="fromTime"> to <input type="time" id="toTime">
+        <div class="time-picker">
+            <select id="fromHour"></select> : <select id="fromMinute"></select> to
+            <select id="toHour"></select> : <select id="toMinute"></select>
+        </div>
         <h3>Category</h3>
         <button class="category">Meeting</button>
         <button class="category">Work</button>
