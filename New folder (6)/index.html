@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule App</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="homePage">
+        <header>
+            <button id="todayBtn">Today</button>
+            <button id="tomorrowBtn">Tomorrow</button>
+            <button id="allBtn">All</button>
+        </header>
+        <h1>25 February</h1>
+        <p>08.00</p>
+        <div id="taskList"></div>
+        <button id="addTask">+</button>
+    </div>
+    
+    <div id="addTaskPage" style="display: none;">
+        <button id="backBtn">Back</button>
+        <h2>Select Time</h2>
+        <input type="time" id="fromTime"> to <input type="time" id="toTime">
+        <h3>Category</h3>
+        <button class="category">Meeting</button>
+        <button class="category">Work</button>
+        <button class="category">Personal</button>
+        <textarea id="note" placeholder="Note..."></textarea>
+        <button id="saveTask">Save</button>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
