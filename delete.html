@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Embedded Timer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+  <style>
+
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Fredoka One', cursive;
+}
+
+body {
+    min-height: 100vh;
+    background: linear-gradient(-135deg, rgb(60, 60, 60), #000000);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1em;
+}
+
+.contain {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2em;
+    color: white;
+    background: rgba(255, 255, 255, 0.3);
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    border-radius: 2em;
+    padding: 4em 3em;
+    position: relative;
+    max-width: 90vw;
+}
+
+h1.title, h2.describe1, hr {
+    text-align: center;
+    color: white;
+    margin-bottom: 1em;
+}
+
+.title {
+    justify-content: center;
+    font-size: 3em;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+.describe1 {
+    justify-content: center;
+    font-size: 30px;
+    font-weight: 20;
+    color: rgb(255, 255, 255);
+    text-align: center;
+}
+
+hr {
+    width: 100%;
+    background-color: white;
+    height: 5px;
+    border-radius: 1em;
+    border: none;
+    margin-top: -10px;
+}
+
+.timer-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 200px;
+    height: auto;
+    aspect-ratio: 1/1;
+}
+
+.timer {
+    font-size: 3em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    top: 50%;
+    left: 50%;
+}
+
+.button-wrapper {
+    display: flex;
+    gap: 1em;
+}
+
+button {
+    font-size: 1.5em;
+    padding: 0.5em 1.5em;
+    border-radius: 0.5em;
+    border: none;
+    color: #FFF;
+    cursor: pointer;
+    transition: 0.2s ease-in-out;
+}
+
+button:hover {
+    transform: translateY(-5px);
+}
+
+/* Audio button */
+.Audio-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 10px 15px;
+    background: #000;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 100px;
+    font-size: 16px;
+}
+
+/* Audio panel */
+.Audio-panel {
+    position: absolute;
+    top: 60px;
+    right: 20px;
+    width: 200px;
+    background: rgba(0, 0, 0, 0.301);
+    padding: 15px;
+    border-radius: 10px;
+    display: none;
+}
+
+.Audio-panel label, .Audio-panel button {
+    color: white;
+    font-size: 14px;
+}
+
+.Audio-panel input[type="range"] {
+    width: 100%;
+    margin-top: 5px;
+}
+
+.Audio-panel {
+    background-color: rgb(140, 140, 140);
+    transform: translateY(-5px);
+}
+
+.toggle-btn {
+    width: 100%;
+    padding: 10px;
+    color: rgb(255, 255, 255) !important;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+.volume-slider {
+    color: black;
+}
+
+@media (max-width: 400px) {
+    .timer-wrapper {
+        max-width: 120px;
+    }
+    .timer {
+        font-size: 1.5em;
+    }
+}
+@media (max-width: 600px) {
+
+    .Audio-btn {
+        top: auto;
+        bottom: 20px;
+        right: 10px;
+    }
+    .contain {
+        padding: 2em;
+        max-width: 100%;
+    }
+
+    .title {
+        font-size: 2em;
+    }
+
+    .describe1 {
+        font-size: 20px;
+    }
+
+    .timer-wrapper {
+        max-width: 150px;
+    }
+
+    .timer {
+        font-size: 2em;
+    }
+
+    .button-wrapper {
+        flex-direction: column;
+        width: 100%;
+        align-items: center;
+    }
+
+    button {
+        width: 80%;
+        font-size: 1.2em;
+    }
+}
+
+#start { background-color: rgb(139, 209, 35); }
+#stop { background-color: rgb(246, 25, 25); }
+#reset { background-color: rgb(24, 137, 242); }
+#toggle-button { background-color: rgb(246, 25, 25); }
+
+.fixed-candle {
+    height: 150px;
+    align-content: end;
+}
+
+.candle {
+    position: relative;
+    width: 40px;
+    height: 30px;
+    background-color: #ffcc66;
+    border-radius: 5px;
+    transition: height 1s linear;
+    height: 100px;
+    min-height: 5px;
+}
+
+.flame {
+    position: absolute;
+    top: -35px;
+    left: 50%;
+    width: 20px;
+    height: 35px;
+    background: radial-gradient(ellipse at bottom, yellow, orange, red);
+    border-radius: 50% 50% 40% 40% / 80% 80% 20% 20%;
+    transform-origin: center bottom;
+    animation: flicker 0.2s infinite alternate ease-in-out;
+}
+
+.fire-particle {
+    position: absolute;
+    top: -50px;
+    width: 5px;
+    height: 5px;
+    background-color: orange;
+    border-radius: 50%;
+    opacity: 1;
+    animation: riseFire 1s ease-out forwards;
+}
+
+@keyframes riseFire {
+    0% { transform: translate(0, 0) scale(1); opacity: 1; }
+    100% { transform: translate(0px, -50px) scale(0.5); opacity: 0; }
+}
+
+.smoke-particle {
+    position: absolute;
+    top: -70px;
+    width: 8px;
+    height: 8px;
+    background-color: rgba(150, 150, 150, 0.5);
+    border-radius: 50%;
+    opacity: 0.8;
+    animation: riseSmoke 2.5s ease-out forwards;
+}
+
+@keyframes riseSmoke {
+    0% { transform: translate(0, 0) scale(1); opacity: 0.8; }
+    100% { transform: translate(10px, -100px) scale(1.5); opacity: 0; }
+}
+
+@keyframes flicker {
+    0% { transform: translateX(-50%) scale(1.1); opacity: 0.9; }
+    100% { transform: translateX(-50%) scale(0.9); opacity: 1; }
+}
+
+.smoke {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    background-color: gray;
+    border-radius: 50%;
+    opacity: 0;
+    animation: rise 2s ease-out forwards;
+}
+
+@keyframes rise {
+    0% { transform: translate(-50%, 0) scale(1); opacity: 1; }
+    100% { transform: translate(-50%, -100px) scale(0.5); opacity: 0; }
+}
+
+
+
+
+  </style>
+</head>
+<body>
+
+   
+   
+       
+   <!-- Audio Button -->
+   <button class="Audio-btn" onclick="toggleAudio()">🔊</button>
+
+   <!-- Audio Panel -->
+   <div class="Audio-panel" id="AudioPanel">
+       <button id="toggle-button" class="toggle-btn">Turn Music Off</button>
+       <label for="volume-slider">Volume:</label>
+       <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="1">
+   </div>
+
+    <!-- Audio element -->
+    <audio id="background-music" loop>
+       <source src="P.wav" type="audio/wav">
+       Your browser does not support the audio element.
+   </audio>
+   
+
+   
+
+  
+   <div class="contain"> 
+    <h1 class="title">Melt ME! The Candle!</h1> 
+   <h2 class="describe1">Read 25:00 | Rest 5:00</h2>
+   <!--hr-->
+    <div class="fixed-candle">
+       <div class="candle" id="candle">
+           <div class="flame" id="flame"></div>
+       </div>
+   </div>
+
+   <p class="timer" id="timer">25:00</p>
+
+       <div class="button-wrapper">
+           <button id="start">Start</button>
+           <button id="stop">Stop</button>
+           <button id="reset">Reset</button>
+       </div>
+   </div>
+
+    <script>
+       //66010338 was the creator
+
+const audio = document.getElementById('background-music');
+const button = document.getElementById('toggle-button');
+const volumeSlider = document.getElementById('volume-slider');
+const AudioPanel = document.getElementById('AudioPanel');
+
+//audio.play().catch(error => console.log("Auto-play blocked:", error));
+    // Toggle Audio panel visibility
+function toggleAudio() {
+    AudioPanel.style.display = (AudioPanel.style.display === "block") ? "none" : "block";
+}
+
+// Flag to track the music state
+let isMusicPlaying = false;
+
+// Add event listener for button click
+button.addEventListener('click', () => {
+    if (isMusicPlaying) {
+        // Pause the music and update button text
+        audio.pause();
+        button.textContent = "Turn Music Off";
+        button.style.backgroundColor = "rgb(246, 25, 25)"; // Change background
+         
+    } else {
+        // Play the music and update button text
+        audio.play();
+        button.textContent = "Turn Music On";
+        button.style.backgroundColor = "rgb(139, 209, 35)"; // Change background
+    }
+    // Toggle the music state
+    isMusicPlaying = !isMusicPlaying;
+});
+
+volumeSlider.addEventListener('input', () => {
+    audio.volume = volumeSlider.value;
+});
+
+
+const start = document.getElementById("start");
+const stop = document.getElementById("stop");
+const reset = document.getElementById("reset");
+// const rest = document.getElementById("rest");
+
+const timer = document.getElementById("timer");
+
+let timeLeft = 10;
+let totalTime = 10; // Set full duration (example: 1 minute)
+let extraTime = 6;
+let bufferNowTime;
+let fireInterval;
+let smokeInterval;
+
+const updateTimer = () => {
+    
+    const minutes = Math.floor(timeLeft / 60);
+    const secs = timeLeft % 60;
+    timer.innerHTML = `${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+
+};
+
+const updateExtra = () => {
+    
+    const min = Math.floor(extraTime / 60);
+    const sec = extraTime % 60;
+    timer.innerHTML = `${min.toString().padStart(2, "0")}:${sec.toString().padStart(2, "0")}`;
+
+};
+
+if(start.disabled = true && timeLeft == 0){
+        alert("Pls, Click reset");
+    }
+const startTimer = () =>{
+    
+    start.disabled = true; // Disable start button to prevent spamming
+    start.style.backgroundColor = "rgb(74, 116, 11)";
+    stop.style.backgroundColor = "rgb(246, 25, 25)";
+    
+
+    bufferNowTime = setInterval(() => {
+
+        if (timeLeft > 0) {
+            start.disabled = true;
+            timeLeft--;
+            document.getElementById("candle").style.height = (100 * (timeLeft / totalTime)) + "px";
+            updateTimer();
+        }else{
+            alert("Session end!"); // You can modify this action
+            start.disabled = true;
+            clearInterval(bufferNowTime);
+            clearInterval(fireInterval); // Stop fire particles
+            clearInterval(smokeInterval); // Stop smoke particles when the flame is out
+            document.getElementById("flame").style.display = "none";
+            createSmoke(); 
+            timeLeft=0;
+            updateTimer();
+            
+            //extraTime = 5;
+            const extraCountdown = setInterval(() => {
+                if(timeLeft==0){
+                    stop.disabled = true;
+                    stop.style.backgroundColor = "rgb(85, 85, 85)";
+                    start.disabled = true;
+                    start.style.backgroundColor = "rgb(85, 85, 85)";
+                }
+                
+                if (extraTime > 0 && timeLeft==0) {
+                    extraTime--;
+                    updateExtra(); // Update the timer display
+                } else {
+                    reset.disabled = false;
+                    clearInterval(extraCountdown);
+                    alert("Extra time over!"); // You can modify this action
+                    // start.disabled = false;
+                    // stop.disabled = false;
+
+                    // start.disabled = false; // Re-enable start button after extra time
+                }
+            }, 1000);
+        }
+        
+        
+    }, 1000);//-1000ms = 1secs
+    
+    
+    extraTime = 6; //secs
+    smokeInterval = setInterval(createSmokeParticles, 1500); // Generate smoke while flame is burning
+    fireInterval = setInterval(createFireParticles, 500); // Generate fire particles
+};
+
+
+
+const stopTimer = () => {
+    clearInterval(bufferNowTime);
+    clearInterval(fireInterval); // Stop fire particles
+    clearInterval(smokeInterval); // Stop smoke particles when the flame is out
+    
+    //  Time under or  =  expected val
+    updateTimer();
+    start.disabled = false; // can press start
+    start.style.backgroundColor = "rgb(146, 232, 16)";
+    stop.style.backgroundColor = "rgb(109, 12, 12)";
+    
+    
+    
+    
+};
+
+
+
+
+const resetTimer = () => {
+    if(timeLeft==10){
+        start.disabled = false;
+        stop.disabled = false;
+        start.style.backgroundColor = "rgb(139, 209, 35)";
+        stop.style.backgroundColor = "rgb(246, 25, 25)";
+        clearInterval(bufferNowTime);
+        clearInterval(fireInterval); // Stop fire particles
+        clearInterval(smokeInterval); // Stop smoke particles when the flame is out
+    }
+    start.disabled = false;
+    stop.disabled = false;
+    start.style.backgroundColor = "rgb(139, 209, 35)";
+    stop.style.backgroundColor = "rgb(246, 25, 25)";
+    clearInterval(bufferNowTime);
+    clearInterval(fireInterval); // Stop fire particles
+    clearInterval(smokeInterval); // Stop smoke particles when the flame is out
+    
+    //extraTime = 0; //secs
+    timeLeft = 10; // รีเซ็ตเวลา
+    updateTimer();
+    
+    document.getElementById("candle").style.height = "100px"; // รีเซ็ตความสูงเทียน
+    document.getElementById("flame").style.display = "block"; // แสดงเปลวไฟใหม่
+
+       
+    };
+
+
+
+
+    
+
+    function createFireParticles() {
+        if (timeLeft <= 0) return; // Stop fire particles when time is up
+
+        for (let i = 0; i < 3; i++) {  
+            setTimeout(() => {
+                const fire = document.createElement("div");
+                fire.classList.add("fire-particle");
+
+                // More random positioning
+                let randomX = Math.random() * 20 - 10; // Random left movement (-10 to 10)
+                let randomY = Math.random() * 10 - 5;  // Random upward movement (-5 to 5)
+                
+                fire.style.left = `calc(50% + ${randomX}px)`;
+                fire.style.top = `calc(-50px + ${randomY}px)`;
+                fire.style.animationDuration = (0.5 + Math.random() * 0.5) + "s"; 
+                
+                document.getElementById("candle").appendChild(fire);
+                setTimeout(() => fire.remove(), 1000); // Remove fire after animation
+            }, i * 100);
+        }
+    }
+
+    function createSmokeParticles() {
+        if (timeLeft <= 0) return; // Stop smoke particles when time is up
+
+        for (let i = 0; i < 3; i++) {  
+            setTimeout(() => {
+                const smoke = document.createElement("div");
+                smoke.classList.add("smoke-particle");
+
+                // More random positioning
+                let randomX = Math.random() * 20 - 10; // Random left movement (-10 to 10)
+                let randomY = Math.random() * 15 - 7;  // Random slight vertical variation (-7 to 7)
+
+                smoke.style.left = `calc(50% + ${randomX}px)`;
+                smoke.style.top = `calc(-70px + ${randomY}px)`;
+                smoke.style.animationDuration = (2 + Math.random()) + "s"; // Random duration
+
+                document.getElementById("candle").appendChild(smoke);
+                setTimeout(() => smoke.remove(), 3000); // Remove after animation
+            }, i * 300);
+        }
+    }
+
+
+
+    function createSmoke() {
+        const smoke = document.createElement("div");
+        smoke.classList.add("smoke");
+        document.getElementById("candle").appendChild(smoke);
+        setTimeout(() => smoke.remove(), 2000); // Remove after animation
+    }
+    updateTimer(); // Initialize the timer display
+
+
+document.addEventListener("visibilitychange", () => {
+        if (document.hidden && timeLeft!=0 && timeLeft != totalTime) {
+            stopTimer();
+            alert("Dont left the candle on fire! Too dangerous!");
+
+        }
+    });
+
+    start.addEventListener("click", ()=>{
+        if(timeLeft == 0){
+            start.style.backgroundColor = "rgb(85, 85, 85)";
+            alert("Pls, Click reset");
+    }else{startTimer();}
+    });
+
+
+    stop.addEventListener("click", ()=>{
+        if(stop.disabled = true && timeLeft == 0){
+            stop.style.backgroundColor = "rgb(85, 85, 85)";
+    }else{stopTimer();}
+    });
+    reset.addEventListener("click", resetTimer);
+
+    
+    </script>
+</body>
+</html>
